@@ -26,30 +26,34 @@ pagina = st.sidebar.selectbox(
     "Selecione a página", ["Registrar Venda", "Relatórios"])
 
 if pagina == "Registrar Venda":
-    st.title("Sistema de Controle de Venda de Águas")
+    st.title("Controle de Venda de Águas")
+
+    # Ajuste de layout para mobile
+    st.write("### Dados da Venda")
 
     # Campos de entrada
-    quantidade = st.number_input("Quantidade de Águas", min_value=1, step=1)
+    quantidade = st.number_input("Qtd. de Águas", min_value=1, step=1)
     torre = st.text_input("Torre")
-    apartamento = st.text_input("Apartamento")
+    apartamento = st.text_input("Apt.")
     validade_garrafao = st.text_input(
         "Validade do Garrafão")  # Input como texto aberto
     forma_pagamento = st.selectbox(
-        "Forma de Pagamento", ["Dinheiro", "Cartão", "Pix"])
+        "Pagamento", ["Dinheiro", "Cartão", "Pix"])
     condominio = st.text_input("Condomínio")
 
-    # Botão de submissão
+    # Botão de submissão centralizado
+    st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
     if st.button("Registrar Venda"):
         data_venda = datetime.now().strftime("%Y-%m-%d")
         hora_venda = datetime.now().strftime("%H:%M:%S")
         nova_venda = {
             "Data": data_venda,
             "Hora": hora_venda,
-            "Quantidade de Águas": quantidade,
+            "Qtd. de Águas": quantidade,
             "Torre": torre,
-            "Apartamento": apartamento,
+            "Apt.": apartamento,
             "Validade do Garrafão": validade_garrafao,
-            "Forma de Pagamento": forma_pagamento,
+            "Pagamento": forma_pagamento,
             "Condomínio": condominio,
         }
 
@@ -57,6 +61,7 @@ if pagina == "Registrar Venda":
         st.session_state.dados_vendas = adicionar_venda(
             st.session_state.dados_vendas, nova_venda)
         st.success("Venda registrada com sucesso!")
+    st.markdown("</div>", unsafe_allow_html=True)
 
 elif pagina == "Relatórios":
     st.title("Relatório de Vendas")
@@ -68,21 +73,22 @@ elif pagina == "Relatórios":
 
         # Filtro por data
         data_selecionada = st.date_input(
-            "Selecione a data", value=datetime.now().date())
+            "Data", value=datetime.now().date())
 
         # Filtra o dataframe pela data selecionada
         df['Data'] = pd.to_datetime(df['Data']).dt.date
         df_filtrado = df[df['Data'] == data_selecionada]
 
         # Calcula os resumos
-        total_vendas = df_filtrado['Quantidade de Águas'].sum()
+        total_vendas = df_filtrado['Qtd. de Águas'].sum()
         faturamento_total = total_vendas * 5  # Supondo que cada água custa R$5
 
-        # Exibe os cards
-        st.metric("Águas Vendidas no Dia", total_vendas)
-        st.metric("Faturamento Total", f"R$ {faturamento_total:.2f}")
+        # Exibe os cards responsivos
+        col1, col2 = st.columns(2)
+        col1.metric("Águas Vendidas", total_vendas)
+        col2.metric("Faturamento", f"R$ {faturamento_total:.2f}")
 
-        # Exibe a tabela
+        # Exibe a tabela responsiva
         st.subheader("Pedidos do Dia")
         st.dataframe(df_filtrado)
     else:
